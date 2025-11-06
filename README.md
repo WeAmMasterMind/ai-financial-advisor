@@ -1,87 +1,193 @@
-# AI Financial Advisor Application
+# Financial Advisor Platform
 
-## Overview
-A comprehensive financial planning and advisory application powered by AI, built with React and Tailwind CSS.
+A comprehensive AI-powered financial advisor application built with React, Node.js, and PostgreSQL.
 
-## Features
-- Budget Analysis & Tracking
-- Investment Portfolio Recommendations
-- Savings Strategy Planning
-- Financial Goals Management
-- AI-Powered Financial Advice (Claude API)
+## 🚀 Features
 
-## Installation
+- **User Authentication**: Secure JWT-based authentication with refresh tokens
+- **Budget Management**: Track income, expenses, and savings
+- **Investment Portfolio**: AI-powered investment recommendations
+- **Financial Goals**: Set and track financial objectives
+- **Real-time Dashboard**: Monitor your financial health at a glance
+- **Secure Data Storage**: PostgreSQL database with encrypted sensitive data
 
-### Prerequisites
-- Node.js (v14 or higher)
-- npm or yarn
-- Anthropic API key
+## 🛠️ Tech Stack
 
-### Setup Instructions
+### Frontend
+- React 18
+- Redux Toolkit (State Management)
+- React Router v6 (Routing)
+- Tailwind CSS (Styling)
+- React Hook Form (Form Management)
+- Axios (API Client)
+- Recharts (Data Visualization)
 
-1. Clone the repository:
+### Backend
+- Node.js & Express
+- PostgreSQL (Database)
+- Redis (Caching & Sessions)
+- JWT (Authentication)
+- Bcrypt (Password Hashing)
+
+## 📦 Prerequisites
+
+- Node.js 18+ and npm 9+
+- PostgreSQL 15+
+- Redis 7+
+- Docker (optional, for database setup)
+
+## 🔧 Installation
+
+### 1. Clone the repository
 ```bash
 git clone <repository-url>
-cd ai-financial-advisor
+cd financial-advisor-platform
 ```
 
-2. Install dependencies:
+### 2. Install dependencies
 ```bash
+# Install root dependencies
 npm install
+
+# Install all dependencies (root, server, client)
+npm run install:all
 ```
 
-3. Create a `.env` file in the root directory and add your Anthropic API key:
-```
-REACT_APP_ANTHROPIC_API_KEY=your-api-key-here
-```
+### 3. Set up environment variables
 
-4. Start the development server:
+#### Server (.env)
 ```bash
-npm start
+cd server
+cp .env.example .env
+# Edit .env with your configuration
 ```
 
-5. Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+Required environment variables:
+- Database credentials
+- JWT secrets
+- API keys (Anthropic)
 
-## Project Structure
-```
-ai-financial-advisor/
-├── public/
-│   └── index.html
-├── src/
-│   ├── components/
-│   │   └── FinancialAdvisorApp.js
-│   ├── services/
-│   │   └── aiService.js
-│   ├── utils/
-│   │   └── calculations.js
-│   ├── data/
-│   │   └── investmentData.js
-│   ├── config/
-│   │   └── apiConfig.js
-│   ├── App.js
-│   ├── index.js
-│   └── index.css
-├── .env
-├── .gitignore
-├── package.json
-├── tailwind.config.js
-├── postcss.config.js
-└── README.md
-```
+### 4. Set up the database
 
-## Build for Production
+#### Using Docker (Recommended):
 ```bash
+# From root directory
+docker-compose up -d
+```
+
+#### Manual PostgreSQL setup:
+```bash
+# Create database
+createdb financial_advisor
+
+# Run migrations
+cd server
+npm run db:migrate
+```
+
+### 5. Start the development servers
+```bash
+# From root directory
+npm run dev
+```
+
+This will start:
+- Backend server: http://localhost:5000
+- Frontend app: http://localhost:3000
+
+## 🏗️ Project Structure
+
+```
+financial-advisor-platform/
+├── client/                 # React frontend
+│   ├── public/
+│   └── src/
+│       ├── components/     # Reusable components
+│       ├── pages/         # Page components
+│       ├── services/      # API services
+│       ├── store/         # Redux store
+│       └── utils/         # Utility functions
+├── server/                # Node.js backend
+│   └── src/
+│       ├── config/        # Configuration files
+│       ├── controllers/   # Route controllers
+│       ├── middleware/    # Express middleware
+│       ├── models/        # Database models
+│       ├── routes/        # API routes
+│       └── utils/         # Utility functions
+├── database/              # Database files
+│   └── init.sql          # Initial schema
+└── docker-compose.yml     # Docker configuration
+```
+
+## 🔐 Security Features
+
+- JWT-based authentication with refresh tokens
+- Password hashing with bcrypt
+- Rate limiting on API endpoints
+- Input validation and sanitization
+- SQL injection prevention
+- XSS protection with Helmet.js
+- CORS configuration
+
+## 📡 API Endpoints
+
+### Authentication
+- `POST /api/auth/register` - Register new user
+- `POST /api/auth/login` - User login
+- `POST /api/auth/refresh-token` - Refresh access token
+- `GET /api/auth/me` - Get current user
+- `POST /api/auth/logout` - Logout user
+
+### User Profile
+- `GET /api/users/profile` - Get user profile
+- `PUT /api/users/profile` - Update user profile
+
+## 🧪 Testing
+
+```bash
+# Run server tests
+npm run test:server
+
+# Run client tests
+npm run test:client
+
+# Run all tests
+npm test
+```
+
+## 🚀 Deployment
+
+### Production Build
+```bash
+# Build client
+cd client
 npm run build
+
+# Start production server
+cd ../server
+NODE_ENV=production npm start
 ```
 
-This creates a production-ready build in the `build` folder.
+### Environment Variables for Production
+- Set `NODE_ENV=production`
+- Use strong JWT secrets
+- Configure production database
+- Set up Redis for production
+- Configure CORS for your domain
 
-## Technologies Used
-- React 18
-- Tailwind CSS
-- Lucide React (icons)
-- Axios (API calls)
-- Anthropic Claude API
+## 📝 Development Workflow
 
-## License
-MIT
+1. Create feature branch from `develop`
+2. Make changes and test locally
+3. Commit with descriptive messages
+4. Push branch and create Pull Request
+5. Merge to `develop` after review
+6. Deploy from `main` branch
+
+## 🐛 Troubleshooting
+
+### Database Connection Issues
+- Ensure PostgreSQL is running
+- Check database credentials in `.env`
+- Verify database exists: `psql -d financial_advisor`
