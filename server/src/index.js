@@ -11,6 +11,8 @@ const { connectRedis } = require('./config/redis');
 const errorHandler = require('./middleware/errorHandler');
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
+const questionnaireRoutes = require('./routes/questionnaireRoutes');
+const budgetRoutes = require('./routes/budgetRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -59,6 +61,8 @@ app.get('/health', (req, res) => {
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/questionnaire', questionnaireRoutes);
+app.use('/api/budgets', budgetRoutes);
 
 // 404 handler
 app.use((req, res) => {

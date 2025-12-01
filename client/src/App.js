@@ -18,6 +18,9 @@ import Register from './pages/auth/Register';
 import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
 
+import QuestionnaireWizard from './pages/questionnaire/QuestionnaireWizard';
+import BudgetDashboard from './pages/budget/BudgetDashboard';
+
 function AppRoutes() {
   const dispatch = useDispatch();
   const { isAuthenticated, accessToken } = useSelector((state) => state.auth);
@@ -53,9 +56,10 @@ function AppRoutes() {
           <Route element={<MainLayout />}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/profile" element={<Profile />} />
-            <Route path="/budget" element={<div>Budget Analysis (Coming Soon)</div>} />
             <Route path="/investments" element={<div>Investments (Coming Soon)</div>} />
             <Route path="/goals" element={<div>Goals (Coming Soon)</div>} />
+            <Route path="/questionnaire" element={<QuestionnaireWizard />} />
+            <Route path="/budget" element={<BudgetDashboard />} />
           </Route>
         </Route>
 
