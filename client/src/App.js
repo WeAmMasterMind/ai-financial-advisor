@@ -20,6 +20,19 @@ import Profile from './pages/Profile';
 
 import QuestionnaireWizard from './pages/questionnaire/QuestionnaireWizard';
 import BudgetDashboard from './pages/budget/BudgetDashboard';
+import TransactionList from './pages/transactions/TransactionList';
+import DebtDashboard from './pages/debt/DebtDashboard';
+import DebtForm from './pages/debt/DebtForm';
+import DebtDetail from './pages/debt/DebtDetail';
+import PaymentForm from './pages/debt/PaymentForm';
+import StrategyCalculator from './pages/debt/StrategyCalculator';
+
+import PortfolioDashboard from './pages/portfolio/PortfolioDashboard';
+import PortfolioForm from './pages/portfolio/PortfolioForm';
+import PortfolioDetail from './pages/portfolio/PortfolioDetail';
+import HoldingForm from './pages/portfolio/HoldingForm';
+import RecommendedPortfolio from './pages/portfolio/RecommendedPortfolio';
+import AIAdvisor from './pages/AIAdvisor';
 
 function AppRoutes() {
   const dispatch = useDispatch();
@@ -60,6 +73,21 @@ function AppRoutes() {
             <Route path="/goals" element={<div>Goals (Coming Soon)</div>} />
             <Route path="/questionnaire" element={<QuestionnaireWizard />} />
             <Route path="/budget" element={<BudgetDashboard />} />
+            <Route path="/transactions" element={<TransactionList />} />
+            <Route path="/debt" element={<DebtDashboard />} />
+            <Route path="/debt/new" element={<DebtForm />} />
+            <Route path="/debt/calculator" element={<StrategyCalculator />} />
+            <Route path="/debt/:id" element={<DebtDetail />} />
+            <Route path="/debt/:id/edit" element={<DebtForm />} />
+            <Route path="/debt/:id/payment" element={<PaymentForm />} />
+            <Route path="/portfolio" element={<PortfolioDashboard />} />
+            <Route path="/portfolio/new" element={<PortfolioForm />} />
+            <Route path="/portfolio/recommended" element={<RecommendedPortfolio />} />
+            <Route path="/portfolio/:id" element={<PortfolioDetail />} />
+            <Route path="/portfolio/:id/edit" element={<PortfolioForm />} />
+            <Route path="/portfolio/:id/holding/new" element={<HoldingForm />} />
+            <Route path="/portfolio/:id/holding/:holdingId/edit" element={<HoldingForm />} />
+            <Route path="/advisor" element={<AIAdvisor />} />
           </Route>
         </Route>
 

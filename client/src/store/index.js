@@ -4,6 +4,10 @@ import userReducer from './features/userSlice';
 import uiReducer from './features/uiSlice';
 import questionnaireReducer from './features/questionnaireSlice';
 import budgetReducer from './features/budgetSlice';
+import transactionReducer from './features/transactionSlice';
+import debtReducer from './features/debtSlice';
+import portfolioReducer from './features/portfolioSlice';
+import aiReducer from './features/aiSlice';
 
 export const store = configureStore({
   reducer: {
@@ -12,6 +16,10 @@ export const store = configureStore({
     ui: uiReducer,
     questionnaire: questionnaireReducer,
     budget: budgetReducer,
+    transactions: transactionReducer,
+    debt: debtReducer,
+    portfolio: portfolioReducer,
+    ai: aiReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

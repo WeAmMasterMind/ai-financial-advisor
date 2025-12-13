@@ -12,10 +12,12 @@ import {
   LogOut,
   PieChart,
   Bell,
+  Sparkles,
   Settings
 } from 'lucide-react';
 import { logout } from '../../store/features/authSlice';
 import toast from 'react-hot-toast';
+
 
 const MainLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -25,10 +27,15 @@ const MainLayout = () => {
 
   const navigation = [
     { name: 'Dashboard', href: '/dashboard', icon: Home },
+    { name: 'AI Advisor', href: '/advisor', icon: Sparkles },
+    { name: 'Questionnaire', href: '/questionnaire', icon: Target },
     { name: 'Budget', href: '/budget', icon: DollarSign },
-    { name: 'Investments', href: '/investments', icon: TrendingUp },
-    { name: 'Goals', href: '/goals', icon: Target },
+    { name: 'Transactions', href: '/transactions', icon: DollarSign },
+    { name: 'Debt', href: '/debt', icon: TrendingUp },
+    { name: 'Investments', href: '/investments', icon: PieChart },
     { name: 'Analytics', href: '/analytics', icon: PieChart },
+    { name: 'Portfolio', href: '/portfolio', icon: PieChart },
+    { name: 'Goals', href: '/goals', icon: Target },
   ];
 
   const handleLogout = async () => {
