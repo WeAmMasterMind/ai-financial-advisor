@@ -8,6 +8,7 @@ import transactionReducer from './features/transactionSlice';
 import debtReducer from './features/debtSlice';
 import portfolioReducer from './features/portfolioSlice';
 import aiReducer from './features/aiSlice';
+import marketReducer from './features/marketSlice';
 
 export const store = configureStore({
   reducer: {
@@ -20,6 +21,7 @@ export const store = configureStore({
     debt: debtReducer,
     portfolio: portfolioReducer,
     ai: aiReducer,
+    market: marketReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

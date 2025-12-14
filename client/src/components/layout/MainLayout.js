@@ -13,6 +13,10 @@ import {
   PieChart,
   Bell,
   Sparkles,
+  Star,
+  Lightbulb,
+  MessageCircle,
+  CreditCard,
   Settings
 } from 'lucide-react';
 import { logout } from '../../store/features/authSlice';
@@ -35,6 +39,9 @@ const MainLayout = () => {
     { name: 'Investments', href: '/investments', icon: PieChart },
     { name: 'Analytics', href: '/analytics', icon: PieChart },
     { name: 'Portfolio', href: '/portfolio', icon: PieChart },
+    { name: 'Market', href: '/market', icon: TrendingUp },
+    { name: 'Watchlist', href: '/watchlist', icon: Star },
+    { name: 'Suggestions', href: '/suggestions', icon: Lightbulb },
     { name: 'Goals', href: '/goals', icon: Target },
   ];
 

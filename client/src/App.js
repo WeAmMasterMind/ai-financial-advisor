@@ -34,6 +34,11 @@ import HoldingForm from './pages/portfolio/HoldingForm';
 import RecommendedPortfolio from './pages/portfolio/RecommendedPortfolio';
 import AIAdvisor from './pages/AIAdvisor';
 
+import MarketExplorer from './pages/market/MarketExplorer';
+import AssetDetail from './pages/market/AssetDetail';
+import Watchlist from './pages/market/Watchlist';
+import InvestmentSuggestions from './pages/market/InvestmentSuggestions';
+
 function AppRoutes() {
   const dispatch = useDispatch();
   const { isAuthenticated, accessToken } = useSelector((state) => state.auth);
@@ -88,6 +93,11 @@ function AppRoutes() {
             <Route path="/portfolio/:id/holding/new" element={<HoldingForm />} />
             <Route path="/portfolio/:id/holding/:holdingId/edit" element={<HoldingForm />} />
             <Route path="/advisor" element={<AIAdvisor />} />
+            <Route path="/market" element={<MarketExplorer />} />
+            <Route path="/market/asset/:symbol" element={<AssetDetail />} />
+            <Route path="/watchlist" element={<Watchlist />} />
+            <Route path="/suggestions" element={<InvestmentSuggestions />} />
+            <Route path="/portfolio/dashboard" element={<PortfolioDashboard />} />
           </Route>
         </Route>
 

@@ -1,205 +1,358 @@
-/**
- * Portfolio Dashboard
- * Overview of all investment portfolios
- */
-
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
-import { fetchPortfolios, deletePortfolio, clearSuccess } from '../../store/features/portfolioSlice';
+import { useNavigate } from 'react-router-dom';
+import {
+  TrendingUp,
+  TrendingDown,
+  RefreshCw,
+  PieChart,
+  BarChart3,
+  Plus,
+  Lightbulb
+} from 'lucide-react';
+import {
+  PieChart as RechartsPie,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip
+} from 'recharts';
+import { fetchPortfolios } from '../../store/features/portfolioSlice';
+import { 
+  fetchPortfolioLive, 
+  fetchPortfolioPerformance 
+} from '../../store/features/marketSlice';
+import toast from 'react-hot-toast';
+
+const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
 
 const PortfolioDashboard = () => {
   const dispatch = useDispatch();
-  const { portfolios, isLoading, successMessage } = useSelector(state => state.portfolio);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [portfolioToDelete, setPortfolioToDelete] = useState(null);
+  const navigate = useNavigate();
+  const { portfolios } = useSelector((state) => state.portfolio);
+  const { portfolioLive, performance, portfolioLoading, performanceLoading } = useSelector(
+    (state) => state.market
+  );
+  const [selectedPeriod, setSelectedPeriod] = useState('1M');
+  const [activePortfolioId, setActivePortfolioId] = useState(null);
 
   useEffect(() => {
     dispatch(fetchPortfolios());
   }, [dispatch]);
 
   useEffect(() => {
-    if (successMessage) {
-      const timer = setTimeout(() => dispatch(clearSuccess()), 3000);
-      return () => clearTimeout(timer);
+    if (portfolios.length > 0 && !activePortfolioId) {
+      setActivePortfolioId(portfolios[0].id);
     }
-  }, [successMessage, dispatch]);
+  }, [portfolios, activePortfolioId]);
 
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(amount || 0);
-  };
+  useEffect(() => {
+    if (activePortfolioId) {
+      dispatch(fetchPortfolioLive(activePortfolioId));
+      dispatch(fetchPortfolioPerformance({ portfolioId: activePortfolioId, period: selectedPeriod }));
+    }
+  }, [dispatch, activePortfolioId, selectedPeriod]);
 
-  const handleDeleteClick = (portfolio) => {
-    setPortfolioToDelete(portfolio);
-    setShowDeleteModal(true);
-  };
-
-  const confirmDelete = () => {
-    if (portfolioToDelete) {
-      dispatch(deletePortfolio(portfolioToDelete.id));
-      setShowDeleteModal(false);
-      setPortfolioToDelete(null);
+  const handleRefresh = () => {
+    if (activePortfolioId) {
+      dispatch(fetchPortfolioLive(activePortfolioId));
+      toast.success('Prices refreshed');
     }
   };
 
-  const totalValue = portfolios.reduce((sum, p) => sum + parseFloat(p.calculated_value || p.current_value || 0), 0);
-
-  const getRiskColor = (risk) => {
-    const colors = {
-      conservative: 'bg-blue-100 text-blue-800',
-      moderately_conservative: 'bg-cyan-100 text-cyan-800',
-      moderate: 'bg-green-100 text-green-800',
-      moderately_aggressive: 'bg-yellow-100 text-yellow-800',
-      aggressive: 'bg-red-100 text-red-800'
-    };
-    return colors[risk] || 'bg-gray-100 text-gray-800';
-  };
-
-  if (isLoading && portfolios.length === 0) {
-    return (
-      <div className="flex items-center justify-center min-h-96">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
+  // Prepare pie chart data
+  const allocationData = portfolioLive?.holdings?.reduce((acc, holding) => {
+    const assetType = holding.asset_type || holding.asset_class || 'Other';
+    const existing = acc.find((a) => a.name === assetType);
+    if (existing) {
+      existing.value += holding.value;
+    } else {
+      acc.push({ name: assetType, value: holding.value });
+    }
+    return acc;
+  }, []) || [];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Investment Portfolios</h1>
-          <p className="mt-1 text-gray-500">Manage your investment portfolios and track performance</p>
+          <h1 className="text-2xl font-bold text-gray-900">Portfolio Dashboard</h1>
+          <p className="text-gray-600">Live valuations and performance tracking</p>
         </div>
-        <div className="flex space-x-3">
-          <Link
-            to="/portfolio/recommended"
-            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+        <div className="flex gap-2">
+          <button
+            onClick={handleRefresh}
+            disabled={portfolioLoading}
+            className="flex items-center gap-2 px-4 py-2 border rounded-lg hover:bg-gray-50"
           >
-            Get Recommendation
-          </Link>
-          <Link
-            to="/portfolio/new"
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            <RefreshCw className={`w-4 h-4 ${portfolioLoading ? 'animate-spin' : ''}`} />
+            Refresh
+          </button>
+          <button
+            onClick={() => navigate('/suggestions')}
+            className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
           >
-            + Create Portfolio
-          </Link>
+            <Lightbulb className="w-4 h-4" />
+            Get Suggestions
+          </button>
         </div>
       </div>
 
-      {/* Success Message */}
-      {successMessage && (
-        <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-          <span className="text-green-700">{successMessage}</span>
-        </div>
-      )}
-
-      {/* Total Summary */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl p-6 mb-8 text-white">
-        <p className="text-blue-100 text-sm">Total Portfolio Value</p>
-        <p className="text-4xl font-bold mt-1">{formatCurrency(totalValue)}</p>
-        <p className="text-blue-100 mt-2">{portfolios.length} portfolio{portfolios.length !== 1 ? 's' : ''}</p>
-      </div>
-
-      {/* Portfolio List */}
-      {portfolios.length === 0 ? (
-        <div className="bg-white rounded-xl shadow-sm p-12 text-center">
-          <div className="text-gray-400 text-6xl mb-4">📊</div>
-          <h3 className="text-xl font-semibold text-gray-700 mb-2">No portfolios yet</h3>
-          <p className="text-gray-500 mb-6">Create your first investment portfolio to start tracking your wealth.</p>
-          <Link
-            to="/portfolio/new"
-            className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-          >
-            + Create Your First Portfolio
-          </Link>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {portfolios.map((portfolio) => (
-            <div key={portfolio.id} className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:shadow-md transition-shadow">
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <Link 
-                    to={`/portfolio/${portfolio.id}`}
-                    className="text-lg font-semibold text-gray-900 hover:text-blue-600"
-                  >
-                    {portfolio.portfolio_name}
-                  </Link>
-                  {portfolio.is_primary && (
-                    <span className="ml-2 px-2 py-0.5 bg-yellow-100 text-yellow-800 text-xs rounded-full">Primary</span>
-                  )}
-                </div>
-                <span className={`px-2 py-1 text-xs rounded-full ${getRiskColor(portfolio.risk_level)}`}>
-                  {portfolio.risk_level?.replace('_', ' ')}
-                </span>
-              </div>
-
-              <div className="mb-4">
-                <p className="text-sm text-gray-500">Current Value</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {formatCurrency(portfolio.calculated_value || portfolio.current_value)}
-                </p>
-              </div>
-
-              <div className="flex justify-between text-sm text-gray-500 mb-4">
-                <span>{portfolio.holdings_count || 0} holdings</span>
-                <span>{portfolio.portfolio_type?.replace('_', ' ')}</span>
-              </div>
-
-              <div className="flex justify-between pt-4 border-t">
-                <Link
-                  to={`/portfolio/${portfolio.id}`}
-                  className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-                >
-                  View Details
-                </Link>
-                <div className="space-x-3">
-                  <Link
-                    to={`/portfolio/${portfolio.id}/edit`}
-                    className="text-gray-600 hover:text-gray-800 text-sm"
-                  >
-                    Edit
-                  </Link>
-                  <button
-                    onClick={() => handleDeleteClick(portfolio)}
-                    className="text-red-600 hover:text-red-800 text-sm"
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
-            </div>
+      {/* Portfolio Selector */}
+      {portfolios.length > 1 && (
+        <div className="flex gap-2">
+          {portfolios.map((p) => (
+            <button
+              key={p.id}
+              onClick={() => setActivePortfolioId(p.id)}
+              className={`px-4 py-2 rounded-lg ${
+                activePortfolioId === p.id
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              {p.name}
+            </button>
           ))}
         </div>
       )}
 
-      {/* Delete Modal */}
-      {showDeleteModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Delete Portfolio</h3>
-            <p className="text-gray-600 mb-6">
-              Are you sure you want to delete "{portfolioToDelete?.portfolio_name}"? This will also delete all holdings.
+      {/* Summary Cards */}
+      {portfolioLive && (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="bg-white rounded-xl border p-6">
+            <p className="text-sm text-gray-500">Total Value</p>
+            <p className="text-2xl font-bold mt-1">
+              ${portfolioLive.totalValue?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </p>
-            <div className="flex justify-end space-x-3">
-              <button
-                onClick={() => setShowDeleteModal(false)}
-                className="px-4 py-2 text-gray-600 hover:text-gray-800"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={confirmDelete}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
-              >
-                Delete
-              </button>
+          </div>
+          <div className="bg-white rounded-xl border p-6">
+            <p className="text-sm text-gray-500">Total Cost</p>
+            <p className="text-2xl font-bold mt-1">
+              ${portfolioLive.totalCost?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </p>
+          </div>
+          <div className="bg-white rounded-xl border p-6">
+            <p className="text-sm text-gray-500">Total Gain/Loss</p>
+            <p className={`text-2xl font-bold mt-1 ${portfolioLive.totalGain >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              {portfolioLive.totalGain >= 0 ? '+' : ''}
+              ${portfolioLive.totalGain?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </p>
+          </div>
+          <div className="bg-white rounded-xl border p-6">
+            <p className="text-sm text-gray-500">Return</p>
+            <div className={`flex items-center gap-2 mt-1 ${portfolioLive.totalGainPercent >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              {portfolioLive.totalGainPercent >= 0 ? (
+                <TrendingUp className="w-6 h-6" />
+              ) : (
+                <TrendingDown className="w-6 h-6" />
+              )}
+              <span className="text-2xl font-bold">
+                {portfolioLive.totalGainPercent >= 0 ? '+' : ''}
+                {portfolioLive.totalGainPercent?.toFixed(2)}%
+              </span>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Charts Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Performance Chart */}
+        <div className="bg-white rounded-xl border p-6">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-semibold flex items-center gap-2">
+              <BarChart3 className="w-5 h-5 text-blue-500" />
+              Performance
+            </h2>
+            <div className="flex gap-1">
+              {['1W', '1M', '3M', '6M', '1Y'].map((p) => (
+                <button
+                  key={p}
+                  onClick={() => setSelectedPeriod(p)}
+                  className={`px-2 py-1 text-xs rounded ${
+                    selectedPeriod === p
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-100 hover:bg-gray-200'
+                  }`}
+                >
+                  {p}
+                </button>
+              ))}
+            </div>
+          </div>
+          
+          {performanceLoading ? (
+            <div className="flex items-center justify-center h-48">
+              <RefreshCw className="w-6 h-6 animate-spin text-blue-500" />
+            </div>
+          ) : performance?.dataPoints?.length > 0 ? (
+            <div className="h-48">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={performance.dataPoints}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                  <XAxis
+                    dataKey="date"
+                    tick={{ fontSize: 10 }}
+                    tickFormatter={(d) => new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                  />
+                  <YAxis
+                    tick={{ fontSize: 10 }}
+                    tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`}
+                  />
+                  <Tooltip
+                    formatter={(v) => [`$${v.toLocaleString()}`, 'Value']}
+                  />
+                  <Line type="monotone" dataKey="value" stroke="#3b82f6" strokeWidth={2} dot={false} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          ) : (
+            <div className="flex items-center justify-center h-48 text-gray-500">
+              <p>No performance data yet</p>
+            </div>
+          )}
+          
+          {performance && (
+            <div className="flex justify-between mt-4 pt-4 border-t text-sm">
+              <span className="text-gray-500">{selectedPeriod} Change</span>
+              <span className={performance.percentChange >= 0 ? 'text-green-600' : 'text-red-600'}>
+                {performance.percentChange >= 0 ? '+' : ''}{performance.percentChange?.toFixed(2)}%
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* Allocation Chart */}
+        <div className="bg-white rounded-xl border p-6">
+          <h2 className="text-lg font-semibold flex items-center gap-2 mb-4">
+            <PieChart className="w-5 h-5 text-purple-500" />
+            Allocation
+          </h2>
+          
+          {allocationData.length > 0 ? (
+            <div className="flex items-center gap-6">
+              <div className="w-48 h-48">
+                <ResponsiveContainer width="100%" height="100%">
+                  <RechartsPie>
+                    <Pie
+                      data={allocationData}
+                      dataKey="value"
+                      nameKey="name"
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={80}
+                    >
+                      {allocationData.map((entry, index) => (
+                        <Cell key={entry.name} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(v) => `$${v.toLocaleString()}`} />
+                  </RechartsPie>
+                </ResponsiveContainer>
+              </div>
+              <div className="flex-1 space-y-2">
+                {allocationData.map((item, index) => (
+                  <div key={item.name} className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div
+                        className="w-3 h-3 rounded-full"
+                        style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                      />
+                      <span className="text-sm capitalize">{item.name}</span>
+                    </div>
+                    <span className="text-sm font-medium">
+                      {((item.value / portfolioLive?.totalValue) * 100).toFixed(1)}%
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center justify-center h-48 text-gray-500">
+              <p>No holdings yet</p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Holdings Table */}
+      {portfolioLive?.holdings?.length > 0 && (
+        <div className="bg-white rounded-xl border overflow-hidden">
+          <div className="px-6 py-4 border-b">
+            <h2 className="text-lg font-semibold">Holdings</h2>
+          </div>
+          <table className="w-full">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="text-left px-6 py-3 text-sm font-medium text-gray-500">Symbol</th>
+                <th className="text-right px-6 py-3 text-sm font-medium text-gray-500">Shares</th>
+                <th className="text-right px-6 py-3 text-sm font-medium text-gray-500">Price</th>
+                <th className="text-right px-6 py-3 text-sm font-medium text-gray-500">Value</th>
+                <th className="text-right px-6 py-3 text-sm font-medium text-gray-500">Gain/Loss</th>
+                <th className="text-right px-6 py-3 text-sm font-medium text-gray-500">Today</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y">
+              {portfolioLive.holdings.map((holding) => (
+                <tr
+                  key={holding.id}
+                  className="hover:bg-gray-50 cursor-pointer"
+                  onClick={() => navigate(`/market/asset/${holding.symbol}`)}
+                >
+                  <td className="px-6 py-4">
+                    <div>
+                      <p className="font-medium">{holding.symbol}</p>
+                      <p className="text-sm text-gray-500">{holding.name}</p>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 text-right">{holding.quantity}</td>
+                  <td className="px-6 py-4 text-right">
+                    ${holding.currentPrice?.toFixed(2)}
+                  </td>
+                  <td className="px-6 py-4 text-right font-medium">
+                    ${holding.value?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </td>
+                  <td className={`px-6 py-4 text-right ${holding.gain >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {holding.gain >= 0 ? '+' : ''}${holding.gain?.toFixed(2)}
+                    <span className="text-xs ml-1">({holding.gainPercent?.toFixed(1)}%)</span>
+                  </td>
+                  <td className={`px-6 py-4 text-right ${holding.dayChange >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {holding.dayChangePercent !== undefined ? (
+                      <>
+                        {holding.dayChangePercent >= 0 ? '+' : ''}
+                        {holding.dayChangePercent?.toFixed(2)}%
+                      </>
+                    ) : (
+                      '-'
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* Empty State */}
+      {portfolios.length === 0 && (
+        <div className="text-center py-12 bg-gray-50 rounded-xl">
+          <PieChart className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-gray-900">No portfolios yet</h3>
+          <p className="text-gray-600 mt-2">Create a portfolio to start tracking your investments</p>
+          <button
+            onClick={() => navigate('/portfolio/new')}
+            className="mt-4 flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg mx-auto hover:bg-blue-700"
+          >
+            <Plus className="w-4 h-4" />
+            Create Portfolio
+          </button>
         </div>
       )}
     </div>
