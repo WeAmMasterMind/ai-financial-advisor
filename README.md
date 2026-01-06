@@ -41,7 +41,7 @@ A comprehensive AI-powered financial advisor application built with React, Node.
 ### 1. Clone the repository
 ```bash
 git clone <repository-url>
-cd financial-advisor-platform
+cd ai-financial-advisor
 ```
 
 ### 2. Install dependencies

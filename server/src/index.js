@@ -20,6 +20,9 @@ const aiRoutes = require('./routes/aiRoutes');
 const marketRoutes = require('./routes/marketRoutes');
 const suggestionRoutes = require('./routes/suggestionRoutes');
 const watchlistRoutes = require('./routes/watchlistRoutes');
+const goalsRoutes = require('./routes/goalsRoutes');
+const analyticsRoutes = require('./routes/analyticsRoutes');
+const notificationsRoutes = require('./routes/notificationsRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -77,6 +80,9 @@ app.use('/api/ai', aiRoutes);
 app.use('/api/market', marketRoutes);
 app.use('/api/suggestions', suggestionRoutes);
 app.use('/api/watchlist', watchlistRoutes);
+app.use('/api/goals', goalsRoutes);
+app.use('/api/analytics', analyticsRoutes);
+app.use('/api/notifications', notificationsRoutes);
 
 // 404 handler
 app.use((req, res) => {

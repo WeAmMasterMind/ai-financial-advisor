@@ -9,6 +9,9 @@ import debtReducer from './features/debtSlice';
 import portfolioReducer from './features/portfolioSlice';
 import aiReducer from './features/aiSlice';
 import marketReducer from './features/marketSlice';
+import goalsReducer from './features/goalsSlice';
+import analyticsReducer from './features/analyticsSlice';
+import notificationsReducer from './features/notificationsSlice';
 
 export const store = configureStore({
   reducer: {
@@ -22,6 +25,9 @@ export const store = configureStore({
     portfolio: portfolioReducer,
     ai: aiReducer,
     market: marketReducer,
+    goals: goalsReducer,
+    analytics: analyticsReducer,
+    notifications: notificationsReducer
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

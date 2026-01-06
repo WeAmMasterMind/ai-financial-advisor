@@ -268,7 +268,7 @@ const PortfolioDashboard = () => {
                       <span className="text-sm capitalize">{item.name}</span>
                     </div>
                     <span className="text-sm font-medium">
-                      {((item.value / portfolioLive?.totalValue) * 100).toFixed(1)}%
+                      {(portfolioLive?.totalValue ? ((Number(item.value) / Number(portfolioLive.totalValue)) * 100).toFixed(1) : 0)}%
                     </span>
                   </div>
                 ))}
@@ -314,14 +314,14 @@ const PortfolioDashboard = () => {
                   </td>
                   <td className="px-6 py-4 text-right">{holding.quantity}</td>
                   <td className="px-6 py-4 text-right">
-                    ${holding.currentPrice?.toFixed(2)}
+                    ${holding.currentPrice ? Number(holding.currentPrice).toFixed(2) : '—'}
                   </td>
                   <td className="px-6 py-4 text-right font-medium">
                     ${holding.value?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </td>
                   <td className={`px-6 py-4 text-right ${holding.gain >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    {holding.gain >= 0 ? '+' : ''}${holding.gain?.toFixed(2)}
-                    <span className="text-xs ml-1">({holding.gainPercent?.toFixed(1)}%)</span>
+                    {holding.gain >= 0 ? '+' : ''}{holding.gain != null ? Number(holding.gain).toFixed(2) : '—'}
+                    <span className="text-xs ml-1">({holding.gainPercent != null ? Number(holding.gainPercent).toFixed(1) : 0}%)</span>
                   </td>
                   <td className={`px-6 py-4 text-right ${holding.dayChange >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                     {holding.dayChangePercent !== undefined ? (

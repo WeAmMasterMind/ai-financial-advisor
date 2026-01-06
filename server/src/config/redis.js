@@ -77,6 +77,7 @@ const cache = {
 module.exports = {
   connectRedis,
   getClient,
+  getRedisClient: getClient,
   disconnect,
   cache
 };

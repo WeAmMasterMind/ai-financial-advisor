@@ -1,5 +1,6 @@
-import React from 'react';
-import { useSelector } from 'react-redux';
+import React, { useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -9,11 +10,15 @@ import {
   CreditCard,
   ArrowUpRight,
   ArrowDownRight,
-  MoreVertical
+  MoreVertical,
+  Wallet,
+  LineChart,
+  Lightbulb
 } from 'lucide-react';
 
 const Dashboard = () => {
   const { user } = useSelector((state) => state.auth);
+  const navigate = useNavigate();
 
   // Mock data - will be replaced with real data from API
   const stats = [
@@ -59,12 +64,65 @@ const Dashboard = () => {
     { id: 5, name: 'Gas Station', amount: -45.00, date: '2024-01-11', category: 'Transport' },
   ];
 
+  // FIX #1: Quick action handlers
+  const quickActions = [
+    {
+      label: 'Add Transaction',
+      icon: DollarSign,
+      color: 'blue',
+      onClick: () => navigate('/transactions')
+    },
+    {
+      label: 'View Portfolio',
+      icon: Wallet,
+      color: 'green',
+      onClick: () => navigate('/portfolio')
+    },
+    {
+      label: 'Review Budget',
+      icon: Target,
+      color: 'purple',
+      onClick: () => navigate('/budget')
+    },
+    {
+      label: 'Market Explorer',
+      icon: LineChart,
+      color: 'indigo',
+      onClick: () => navigate('/market')
+    },
+    {
+      label: 'Get Suggestions',
+      icon: Lightbulb,
+      color: 'yellow',
+      onClick: () => navigate('/suggestions')
+    },
+    {
+      label: 'AI Advisor',
+      icon: TrendingUp,
+      color: 'pink',
+      onClick: () => navigate('/advisor')
+    }
+  ];
+
+  const getColorClasses = (color) => {
+    const colors = {
+      blue: 'bg-blue-50 hover:bg-blue-100 text-blue-600',
+      green: 'bg-green-50 hover:bg-green-100 text-green-600',
+      purple: 'bg-purple-50 hover:bg-purple-100 text-purple-600',
+      indigo: 'bg-indigo-50 hover:bg-indigo-100 text-indigo-600',
+      yellow: 'bg-yellow-50 hover:bg-yellow-100 text-yellow-600',
+      pink: 'bg-pink-50 hover:bg-pink-100 text-pink-600',
+      red: 'bg-red-50 hover:bg-red-100 text-red-600'
+    };
+    return colors[color] || colors.blue;
+  };
+
   return (
     <div>
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900">
-          Welcome back, {user?.firstName}!
+          Welcome back, {user?.firstName || 'User'}!
         </h1>
         <p className="mt-1 text-sm text-gray-500">
           Here's what's happening with your finances today.
@@ -157,36 +215,33 @@ const Dashboard = () => {
               </table>
             </div>
             <div className="px-6 py-3 border-t">
-              <button className="text-sm text-blue-600 hover:text-blue-700 font-medium">
+              <button 
+                onClick={() => navigate('/transactions')}
+                className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+              >
                 View all transactions →
               </button>
             </div>
           </div>
         </div>
 
-        {/* Quick Actions */}
+        {/* Quick Actions - FIX #1: Added onClick handlers */}
         <div className="space-y-6">
           <div className="bg-white rounded-lg shadow p-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
             <div className="space-y-3">
-              <button className="w-full text-left px-4 py-3 rounded-lg bg-blue-50 hover:bg-blue-100 transition-colors">
-                <div className="flex items-center">
-                  <DollarSign className="w-5 h-5 text-blue-600 mr-3" />
-                  <span className="text-sm font-medium text-gray-900">Add Transaction</span>
-                </div>
-              </button>
-              <button className="w-full text-left px-4 py-3 rounded-lg bg-green-50 hover:bg-green-100 transition-colors">
-                <div className="flex items-center">
-                  <PiggyBank className="w-5 h-5 text-green-600 mr-3" />
-                  <span className="text-sm font-medium text-gray-900">Set Savings Goal</span>
-                </div>
-              </button>
-              <button className="w-full text-left px-4 py-3 rounded-lg bg-purple-50 hover:bg-purple-100 transition-colors">
-                <div className="flex items-center">
-                  <Target className="w-5 h-5 text-purple-600 mr-3" />
-                  <span className="text-sm font-medium text-gray-900">Review Budget</span>
-                </div>
-              </button>
+              {quickActions.map((action) => (
+                <button 
+                  key={action.label}
+                  onClick={action.onClick}
+                  className={`w-full text-left px-4 py-3 rounded-lg transition-colors ${getColorClasses(action.color)}`}
+                >
+                  <div className="flex items-center">
+                    <action.icon className="w-5 h-5 mr-3" />
+                    <span className="text-sm font-medium text-gray-900">{action.label}</span>
+                  </div>
+                </button>
+              ))}
             </div>
           </div>
 

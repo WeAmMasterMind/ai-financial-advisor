@@ -1,5 +1,5 @@
 const axios = require('axios');
-const { getRedisClient } = require('../config/redis');
+const { getClient: getRedisClient } = require('../config/redis');
 const { pool } = require('../config/database');
 
 const ALPHA_VANTAGE_BASE = 'https://www.alphavantage.co/query';

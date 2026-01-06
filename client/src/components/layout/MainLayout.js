@@ -21,6 +21,9 @@ import {
 } from 'lucide-react';
 import { logout } from '../../store/features/authSlice';
 import toast from 'react-hot-toast';
+import NotificationBell from '../notifications/NotificationBell';
+import NotificationPanel from '../notifications/NotificationPanel';
+import { selectNotificationPanelOpen } from '../../store/features/notificationsSlice';
 
 
 const MainLayout = () => {
@@ -28,6 +31,8 @@ const MainLayout = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { user } = useSelector((state) => state.auth);
+  const panelOpen = useSelector(selectNotificationPanelOpen);
+  
 
   const navigation = [
     { name: 'Dashboard', href: '/dashboard', icon: Home },
@@ -149,12 +154,11 @@ const MainLayout = () => {
               <Menu className="w-6 h-6" />
             </button>
 
-            <div className="flex items-center space-x-4">
-              <button className="relative p-2 text-gray-600 hover:text-gray-800">
-                <Bell className="w-5 h-5" />
-                <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
-              </button>
+            <div className="flex items-center space-x-4 relative">
+              <NotificationBell />
+              {panelOpen && <NotificationPanel />}
             </div>
+            
           </div>
         </header>
 
