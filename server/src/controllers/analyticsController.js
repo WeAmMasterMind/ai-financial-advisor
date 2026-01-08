@@ -211,7 +211,8 @@ async function getPortfolioValue(userId) {
 // Get spending trends
 const getSpendingTrends = asyncHandler(async (req, res) => {
   const userId = req.user.id;
-  const { period = 'monthly', months = 6 } = req.query;
+  const { period = 'monthly' } = req.query;
+  const months = parseInt(req.query.months) || 6;
 
   // Get spending by category over time
   const categoryTrends = await query(
@@ -285,7 +286,7 @@ const getSpendingTrends = asyncHandler(async (req, res) => {
 // Get net worth history
 const getNetWorthHistory = asyncHandler(async (req, res) => {
   const userId = req.user.id;
-  const { months = 12 } = req.query;
+  const months = parseInt(req.query.months) || 12;
 
   const history = await query(
     `SELECT * FROM net_worth_history
@@ -330,7 +331,7 @@ const recordNetWorthSnapshot = asyncHandler(async (req, res) => {
 // Get financial health history
 const getHealthHistory = asyncHandler(async (req, res) => {
   const userId = req.user.id;
-  const { months = 12 } = req.query;
+  const months = parseInt(req.query.months) || 12;
 
   const history = await query(
     `SELECT * FROM financial_health_history

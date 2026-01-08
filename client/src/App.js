@@ -98,10 +98,10 @@ function AppRoutes() {
             {/* Debt Management */}
             <Route path="/debt" element={<DebtDashboard />} />
             <Route path="/debt/new" element={<DebtForm />} />
+            <Route path="/debt/calculator" element={<StrategyCalculator />} />
             <Route path="/debt/:id" element={<DebtDetail />} />
             <Route path="/debt/:id/edit" element={<DebtForm />} />
             <Route path="/debt/:id/payment" element={<PaymentForm />} />
-            <Route path="/debt/strategy" element={<StrategyCalculator />} />
             
             {/* Portfolio - FIX #2: /investments points to PortfolioDashboard */}
             <Route path="/investments" element={<PortfolioDashboard />} />

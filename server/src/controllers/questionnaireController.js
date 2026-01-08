@@ -109,12 +109,12 @@ const saveProgress = asyncHandler(async (req, res) => {
 
   if (existing.rows.length > 0) {
     // Update existing
-    await query(
-      `UPDATE financial_questionnaire 
-       SET questions_json = $1, current_step = $2, updated_at = NOW()
-       WHERE user_id = $3`,
-      [JSON.stringify(allResponses), step, userId]
-    );
+  await query(
+    `UPDATE financial_questionnaire 
+    SET questions_json = $1, current_step = $2
+    WHERE user_id = $3`,
+    [JSON.stringify(allResponses), step, userId]
+  );
   } else {
     // Create new
     await query(
@@ -182,8 +182,8 @@ const completeQuestionnaire = asyncHandler(async (req, res) => {
     // Update questionnaire as completed
     await client.query(
       `UPDATE financial_questionnaire 
-       SET questions_json = $1, completed_at = NOW(), version = version + 1
-       WHERE user_id = $2`,
+      SET questions_json = $1, completed_at = NOW(), version = version + 1
+      WHERE user_id = $2`,
       [JSON.stringify(responses), userId]
     );
 
@@ -195,9 +195,8 @@ const completeQuestionnaire = asyncHandler(async (req, res) => {
         risk_tolerance = $3,
         life_stage = $4,
         financial_knowledge_level = $5,
-        investment_horizon = $6,
-        updated_at = NOW()
-       WHERE user_id = $7`,
+        investment_horizon = $6
+      WHERE user_id = $7`,
       [
         responses.personal?.age,
         responses.income?.stability,
@@ -209,6 +208,47 @@ const completeQuestionnaire = asyncHandler(async (req, res) => {
         userId
       ]
     );
+
+    // Auto-create spending categories from questionnaire expenses
+    const expenseCategories = [
+      { key: 'housing', label: 'Housing', color: '#3B82F6' },
+      { key: 'transportation', label: 'Transportation', color: '#10B981' },
+      { key: 'food', label: 'Food', color: '#F59E0B' },
+      { key: 'healthcare', label: 'Healthcare', color: '#EF4444' },
+      { key: 'entertainment', label: 'Entertainment', color: '#8B5CF6' },
+      { key: 'other', label: 'Other', color: '#6B7280' }
+    ];
+
+    for (const category of expenseCategories) {
+      const amount = responses.expenses?.[category.key] || 0;
+      if (amount > 0) {
+        // Insert or update category
+        await client.query(
+          `INSERT INTO spending_categories (user_id, category_name, monthly_limit, color)
+          VALUES ($1, $2, $3, $4)
+          ON CONFLICT (user_id, category_name) 
+          DO UPDATE SET monthly_limit = $3`,
+          [userId, category.label, amount, category.color]
+        );
+      }
+    }
+
+    // Also create a budget for current month if income was provided
+    if (responses.income?.monthlyIncome) {
+      const currentMonth = new Date().toISOString().slice(0, 7) + '-01';
+      await client.query(
+        `INSERT INTO budgets (user_id, month, monthly_income, savings_goal)
+        VALUES ($1, $2, $3, $4)
+        ON CONFLICT (user_id, month) DO UPDATE 
+        SET monthly_income = $3, savings_goal = $4`,
+        [
+          userId, 
+          currentMonth, 
+          responses.income.monthlyIncome,
+          responses.income.monthlySavings || 0
+        ]
+      );
+    }
   });
 
   // Clear user cache

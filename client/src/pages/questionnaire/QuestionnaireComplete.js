@@ -1,9 +1,12 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CheckCircle, TrendingUp, Shield, Target, ArrowRight } from 'lucide-react';
+import { useDispatch } from 'react-redux';
+import { CheckCircle, TrendingUp, Shield, Target, ArrowRight, Sparkles } from 'lucide-react';
+import { invalidateDashboard } from '../../store/features/dashboardSlice';
 
 const QuestionnaireComplete = ({ results }) => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const getRiskColor = (category) => {
     switch (category) {
@@ -18,6 +21,24 @@ const QuestionnaireComplete = ({ results }) => {
     if (score >= 70) return 'text-green-600';
     if (score >= 50) return 'text-yellow-600';
     return 'text-red-600';
+  };
+
+  // Navigate to dashboard with cache invalidation
+  const handleGoToDashboard = () => {
+    dispatch(invalidateDashboard());
+    navigate('/dashboard');
+  };
+
+  // Navigate to budget with cache invalidation
+  const handleGoToBudget = () => {
+    dispatch(invalidateDashboard());
+    navigate('/budget');
+  };
+
+  // Navigate to AI advisor
+  const handleGoToAdvisor = () => {
+    dispatch(invalidateDashboard());
+    navigate('/advisor');
   };
 
   return (
@@ -41,13 +62,13 @@ const QuestionnaireComplete = ({ results }) => {
           </div>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-4xl font-bold text-gray-900">{results.riskScore}/10</p>
-              <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium mt-2 ${getRiskColor(results.riskCategory)}`}>
-                {results.riskCategory?.charAt(0).toUpperCase() + results.riskCategory?.slice(1)}
+              <p className="text-4xl font-bold text-gray-900">{results?.riskScore || 0}/10</p>
+              <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium mt-2 ${getRiskColor(results?.riskCategory)}`}>
+                {results?.riskCategory?.charAt(0).toUpperCase() + results?.riskCategory?.slice(1) || 'Unknown'}
               </span>
             </div>
             <div className="w-20 h-20 rounded-full border-4 border-blue-600 flex items-center justify-center">
-              <span className="text-2xl font-bold text-blue-600">{results.riskScore}</span>
+              <span className="text-2xl font-bold text-blue-600">{results?.riskScore || 0}</span>
             </div>
           </div>
         </div>
@@ -60,11 +81,11 @@ const QuestionnaireComplete = ({ results }) => {
           </div>
           <div className="flex items-center justify-between">
             <div>
-              <p className={`text-4xl font-bold ${getHealthColor(results.healthScore)}`}>
-                {results.healthScore}/100
+              <p className={`text-4xl font-bold ${getHealthColor(results?.healthScore || 0)}`}>
+                {results?.healthScore || 0}/100
               </p>
               <p className="text-gray-500 mt-2">
-                {results.healthScore >= 70 ? 'Excellent' : results.healthScore >= 50 ? 'Good' : 'Needs Work'}
+                {(results?.healthScore || 0) >= 70 ? 'Excellent' : (results?.healthScore || 0) >= 50 ? 'Good' : 'Needs Work'}
               </p>
             </div>
             <div className="w-20 h-20">
@@ -78,9 +99,9 @@ const QuestionnaireComplete = ({ results }) => {
                 <path
                   d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                   fill="none"
-                  stroke={results.healthScore >= 70 ? '#10b981' : results.healthScore >= 50 ? '#f59e0b' : '#ef4444'}
+                  stroke={(results?.healthScore || 0) >= 70 ? '#10b981' : (results?.healthScore || 0) >= 50 ? '#f59e0b' : '#ef4444'}
                   strokeWidth="3"
-                  strokeDasharray={`${results.healthScore}, 100`}
+                  strokeDasharray={`${results?.healthScore || 0}, 100`}
                 />
               </svg>
             </div>
@@ -95,49 +116,72 @@ const QuestionnaireComplete = ({ results }) => {
           <h3 className="text-lg font-semibold">Life Stage</h3>
         </div>
         <p className="text-xl text-gray-900 capitalize">
-          {results.lifeStage?.replace(/_/g, ' ')}
+          {results?.lifeStage?.replace(/_/g, ' ') || 'Not determined'}
         </p>
       </div>
 
       {/* Recommendations */}
-      <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
-        <h3 className="text-lg font-semibold mb-4">Personalized Recommendations</h3>
-        <div className="space-y-4">
-          {results.recommendations?.map((rec, index) => (
-            <div
-              key={index}
-              className={`p-4 rounded-lg border-l-4 ${
-                rec.priority === 'high'
-                  ? 'bg-red-50 border-red-500'
-                  : 'bg-blue-50 border-blue-500'
-              }`}
-            >
-              <div className="flex items-center justify-between">
-                <h4 className="font-medium text-gray-900">{rec.title}</h4>
-                <span className={`text-xs px-2 py-1 rounded ${
-                  rec.priority === 'high' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'
-                }`}>
-                  {rec.priority} priority
-                </span>
+      {results?.recommendations && results.recommendations.length > 0 && (
+        <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+          <h3 className="text-lg font-semibold mb-4">Personalized Recommendations</h3>
+          <div className="space-y-4">
+            {results.recommendations.map((rec, index) => (
+              <div
+                key={index}
+                className={`p-4 rounded-lg border-l-4 ${
+                  rec.priority === 'high'
+                    ? 'bg-red-50 border-red-500'
+                    : 'bg-blue-50 border-blue-500'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <h4 className="font-medium text-gray-900">{rec.title}</h4>
+                  <span className={`text-xs px-2 py-1 rounded ${
+                    rec.priority === 'high' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'
+                  }`}>
+                    {rec.priority} priority
+                  </span>
+                </div>
+                <p className="text-gray-600 mt-1">{rec.description}</p>
               </div>
-              <p className="text-gray-600 mt-1">{rec.description}</p>
-            </div>
-          ))}
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* AI Advisor Prompt */}
+      <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl border border-purple-200 p-6 mb-8">
+        <div className="flex items-start gap-4">
+          <div className="p-3 bg-purple-100 rounded-lg">
+            <Sparkles className="w-6 h-6 text-purple-600" />
+          </div>
+          <div className="flex-1">
+            <h3 className="font-semibold text-gray-900 mb-1">Get Personalized AI Advice</h3>
+            <p className="text-gray-600 text-sm mb-3">
+              Chat with our AI advisor to get detailed recommendations based on your financial profile.
+            </p>
+            <button
+              onClick={handleGoToAdvisor}
+              className="text-purple-600 hover:text-purple-700 text-sm font-medium"
+            >
+              Talk to AI Advisor →
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Actions */}
       <div className="flex flex-col sm:flex-row gap-4">
         <button
-          onClick={() => navigate('/dashboard')}
-          className="flex-1 flex items-center justify-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          onClick={handleGoToDashboard}
+          className="flex-1 flex items-center justify-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
         >
           Go to Dashboard
           <ArrowRight className="w-5 h-5 ml-2" />
         </button>
         <button
-          onClick={() => navigate('/budget')}
-          className="flex-1 flex items-center justify-center px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+          onClick={handleGoToBudget}
+          className="flex-1 flex items-center justify-center px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
         >
           Set Up Budget
         </button>

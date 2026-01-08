@@ -246,7 +246,7 @@ const debtSlice = createSlice({
         // Update debt balance in list
         const index = state.debts.findIndex(d => d.id === action.payload.debtId);
         if (index !== -1) {
-          state.debts[index].current_balance = action.payload.data.newBalance;
+          state.debts[index].current_balance = action.payload.newBalance;
         }
         state.successMessage = 'Payment recorded successfully';
       })

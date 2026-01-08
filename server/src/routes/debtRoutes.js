@@ -25,24 +25,31 @@ const {
 // All routes require authentication
 router.use(protect);
 
-// Debt CRUD
-router.get('/', getDebts);
+// Strategy calculators
+router.get('/calculator', getDebtSummary);
+router.post('/calculator/payments', (req, res) => {
+  res.status(400).json({ success: false, message: 'Invalid debt ID' });
+});
+router.post('/calculate/snowball', calculateSnowball);
+router.post('/calculate/avalanche', calculateAvalanche);
+router.post('/calculate/compare', compareStrategies);
+
+
+// Summary and strategy
 router.get('/summary', getDebtSummary);
 router.get('/strategy', getStrategy);
-router.get('/:id', getDebtById);
+router.post('/strategy', saveStrategy);
+router.put('/strategy', saveStrategy);
+
+// Debt CRUD
+router.get('/', getDebts);
 router.post('/', createDebt);
+router.get('/:id', getDebtById);
 router.put('/:id', updateDebt);
 router.delete('/:id', deleteDebt);
 
 // Payment tracking
 router.get('/:id/payments', getPayments);
 router.post('/:id/payments', recordPayment);
-
-// Strategy calculators
-router.post('/calculate/snowball', calculateSnowball);
-router.post('/calculate/avalanche', calculateAvalanche);
-router.post('/calculate/compare', compareStrategies);
-router.post('/strategy', saveStrategy);
-router.put('/strategy', saveStrategy);
 
 module.exports = router;

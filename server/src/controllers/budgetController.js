@@ -134,6 +134,62 @@ const createBudget = asyncHandler(async (req, res) => {
     [userId, month, monthlyIncome, JSON.stringify(plannedExpenses || {}), savingsGoal]
   );
 
+  // Sync spending categories with planned expenses
+  if (plannedExpenses && typeof plannedExpenses === 'object') {
+    const categoryColors = {
+      'Housing': '#3B82F6',
+      'Food': '#F59E0B', 
+      'Transportation': '#10B981',
+      'Healthcare': '#EF4444',
+      'Entertainment': '#8B5CF6',
+      'Savings': '#06B6D4',
+      'Other': '#6B7280'
+    };
+
+    for (const [categoryName, limit] of Object.entries(plannedExpenses)) {
+      if (limit > 0) {
+        const color = categoryColors[categoryName] || '#3B82F6';
+        // Check if category exists
+        const existingCat = await query(
+          'SELECT id FROM spending_categories WHERE user_id = $1 AND LOWER(category_name) = LOWER($2)',
+          [userId, categoryName]
+        );
+
+        if (existingCat.rows.length > 0) {
+          await query(
+            'UPDATE spending_categories SET monthly_limit = $1 WHERE id = $2',
+            [limit, existingCat.rows[0].id]
+          );
+        } else {
+          await query(
+            'INSERT INTO spending_categories (user_id, category_name, monthly_limit, color) VALUES ($1, $2, $3, $4)',
+            [userId, categoryName, limit, color]
+          );
+        }
+      }
+    }
+  }
+
+    // Sync Savings category from savingsGoal
+  if (savingsGoal > 0) {
+    const existingSavings = await query(
+      'SELECT id FROM spending_categories WHERE user_id = $1 AND LOWER(category_name) = LOWER($2)',
+      [userId, 'Savings']
+    );
+
+    if (existingSavings.rows.length > 0) {
+      await query(
+        'UPDATE spending_categories SET monthly_limit = $1 WHERE id = $2',
+        [savingsGoal, existingSavings.rows[0].id]
+      );
+    } else {
+      await query(
+        'INSERT INTO spending_categories (user_id, category_name, monthly_limit, color) VALUES ($1, $2, $3, $4)',
+        [userId, 'Savings', savingsGoal, '#06B6D4']
+      );
+    }
+  }
+
   res.status(201).json({
     success: true,
     message: 'Budget created successfully',
@@ -151,8 +207,7 @@ const updateBudget = asyncHandler(async (req, res) => {
     `UPDATE budgets 
      SET monthly_income = COALESCE($1, monthly_income),
          planned_expenses = COALESCE($2, planned_expenses),
-         savings_goal = COALESCE($3, savings_goal),
-         updated_at = NOW()
+         savings_goal = COALESCE($3, savings_goal)
      WHERE id = $4 AND user_id = $5
      RETURNING *`,
     [monthlyIncome, JSON.stringify(plannedExpenses), savingsGoal, id, userId]
@@ -163,6 +218,61 @@ const updateBudget = asyncHandler(async (req, res) => {
       success: false,
       message: 'Budget not found'
     });
+  }
+
+  // Sync spending categories with planned expenses
+  if (plannedExpenses && typeof plannedExpenses === 'object') {
+    const categoryColors = {
+      'Housing': '#3B82F6',
+      'Food': '#F59E0B', 
+      'Transportation': '#10B981',
+      'Healthcare': '#EF4444',
+      'Entertainment': '#8B5CF6',
+      'Savings': '#06B6D4',
+      'Other': '#6B7280'
+    };
+
+    for (const [categoryName, limit] of Object.entries(plannedExpenses)) {
+      if (limit > 0) {
+        const color = categoryColors[categoryName] || '#3B82F6';
+        const existingCat = await query(
+          'SELECT id FROM spending_categories WHERE user_id = $1 AND LOWER(category_name) = LOWER($2)',
+          [userId, categoryName]
+        );
+
+        if (existingCat.rows.length > 0) {
+          await query(
+            'UPDATE spending_categories SET monthly_limit = $1 WHERE id = $2',
+            [limit, existingCat.rows[0].id]
+          );
+        } else {
+          await query(
+            'INSERT INTO spending_categories (user_id, category_name, monthly_limit, color) VALUES ($1, $2, $3, $4)',
+            [userId, categoryName, limit, color]
+          );
+        }
+      }
+    }
+  }
+
+    // Sync Savings category from savingsGoal
+  if (savingsGoal > 0) {
+    const existingSavings = await query(
+      'SELECT id FROM spending_categories WHERE user_id = $1 AND LOWER(category_name) = LOWER($2)',
+      [userId, 'Savings']
+    );
+
+    if (existingSavings.rows.length > 0) {
+      await query(
+        'UPDATE spending_categories SET monthly_limit = $1 WHERE id = $2',
+        [savingsGoal, existingSavings.rows[0].id]
+      );
+    } else {
+      await query(
+        'INSERT INTO spending_categories (user_id, category_name, monthly_limit, color) VALUES ($1, $2, $3, $4)',
+        [userId, 'Savings', savingsGoal, '#06B6D4']
+      );
+    }
   }
 
   res.json({
@@ -252,12 +362,11 @@ const updateCategory = asyncHandler(async (req, res) => {
 
   const result = await query(
     `UPDATE spending_categories 
-     SET category_name = COALESCE($1, category_name),
-         monthly_limit = COALESCE($2, monthly_limit),
-         color = COALESCE($3, color),
-         updated_at = NOW()
-     WHERE id = $4 AND user_id = $5
-     RETURNING *`,
+    SET category_name = COALESCE($1, category_name),
+        monthly_limit = COALESCE($2, monthly_limit),
+        color = COALESCE($3, color)
+    WHERE id = $4 AND user_id = $5
+    RETURNING *`,
     [categoryName, monthlyLimit, color, id, userId]
   );
 

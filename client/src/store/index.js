@@ -12,6 +12,7 @@ import marketReducer from './features/marketSlice';
 import goalsReducer from './features/goalsSlice';
 import analyticsReducer from './features/analyticsSlice';
 import notificationsReducer from './features/notificationsSlice';
+import dashboardReducer from './features/dashboardSlice';
 
 export const store = configureStore({
   reducer: {
@@ -27,7 +28,8 @@ export const store = configureStore({
     market: marketReducer,
     goals: goalsReducer,
     analytics: analyticsReducer,
-    notifications: notificationsReducer
+    notifications: notificationsReducer,
+    dashboard: dashboardReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

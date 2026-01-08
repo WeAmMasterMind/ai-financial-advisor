@@ -7,65 +7,68 @@ import axios from 'axios';
 
 const API_URL = '/api/goals';
 
-// Get all goals
-const getGoals = async (params = {}) => {
-  const response = await axios.get(API_URL, { params });
-  return response.data;
+const getAuthConfig = () => {
+  const token = localStorage.getItem('accessToken');
+  return {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  };
 };
 
-// Get single goal with details
-const getGoal = async (id) => {
-  const response = await axios.get(`${API_URL}/${id}`);
-  return response.data;
-};
-
-// Create new goal
-const createGoal = async (goalData) => {
-  const response = await axios.post(API_URL, goalData);
-  return response.data;
-};
-
-// Update goal
-const updateGoal = async (id, goalData) => {
-  const response = await axios.put(`${API_URL}/${id}`, goalData);
-  return response.data;
-};
-
-// Delete goal
-const deleteGoal = async (id) => {
-  const response = await axios.delete(`${API_URL}/${id}`);
-  return response.data;
-};
-
-// Add contribution to goal
-const addContribution = async (goalId, contributionData) => {
-  const response = await axios.post(`${API_URL}/${goalId}/contributions`, contributionData);
-  return response.data;
-};
-
-// Get goals summary
-const getGoalsSummary = async () => {
-  const response = await axios.get(`${API_URL}/summary`);
-  return response.data;
-};
-
-// Get goal projection
-const getGoalProjection = async (goalId, monthlyAmount) => {
-  const response = await axios.get(`${API_URL}/${goalId}/projection`, {
-    params: { monthlyAmount }
+export const getGoals = async (status = 'active') => {
+  const response = await axios.get(API_URL, {
+    params: { status },
+    ...getAuthConfig()
   });
   return response.data;
 };
 
-const goalsService = {
+export const getGoalById = async (id) => {
+  const response = await axios.get(`${API_URL}/${id}`, getAuthConfig());
+  return response.data;
+};
+
+export const createGoal = async (goalData) => {
+  const response = await axios.post(API_URL, goalData, getAuthConfig());
+  return response.data;
+};
+
+export const updateGoal = async (id, goalData) => {
+  const response = await axios.put(`${API_URL}/${id}`, goalData, getAuthConfig());
+  return response.data;
+};
+
+export const deleteGoal = async (id) => {
+  const response = await axios.delete(`${API_URL}/${id}`, getAuthConfig());
+  return response.data;
+};
+
+export const getGoalsSummary = async () => {
+  const response = await axios.get(`${API_URL}/summary`, getAuthConfig());
+  return response.data;
+};
+
+export const addContribution = async (goalId, data) => {
+  const response = await axios.post(`${API_URL}/${goalId}/contributions`, data, getAuthConfig());
+  return response.data;
+};
+
+export const getGoalProjection = async (goalId, monthlyAmount) => {
+  const response = await axios.get(`${API_URL}/${goalId}/projection`, {
+    params: { monthlyAmount },
+    ...getAuthConfig()
+  });
+  return response.data;
+};
+
+export default {
   getGoals,
-  getGoal,
+  getGoalById,
   createGoal,
   updateGoal,
   deleteGoal,
-  addContribution,
   getGoalsSummary,
+  addContribution,
   getGoalProjection
 };
-
-export default goalsService;

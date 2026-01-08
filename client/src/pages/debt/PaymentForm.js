@@ -21,21 +21,28 @@ const PaymentForm = () => {
     notes: ''
   });
 
-  useEffect(() => {
-    dispatch(fetchDebtById(id));
-    return () => {
-      dispatch(clearCurrentDebt());
-    };
-  }, [dispatch, id]);
+  // Validate that id is a proper UUID, not "calculator" or other routes
+    const isValidUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
 
-  useEffect(() => {
-    if (currentDebt?.minimum_payment) {
-      setFormData(prev => ({
-        ...prev,
-        amount: currentDebt.minimum_payment
-      }));
-    }
-  }, [currentDebt]);
+    useEffect(() => {
+      if (!isValidUUID) {
+        navigate('/debt');
+        return;
+      }
+      dispatch(fetchDebtById(id));
+      return () => {
+        dispatch(clearCurrentDebt());
+      };
+    }, [dispatch, id, isValidUUID, navigate]);
+
+    useEffect(() => {
+      if (currentDebt?.minimum_payment) {
+        setFormData(prev => ({
+          ...prev,
+          amount: currentDebt.minimum_payment
+        }));
+      }
+    }, [currentDebt]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;

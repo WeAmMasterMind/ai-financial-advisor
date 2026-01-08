@@ -39,17 +39,16 @@ const MainLayout = () => {
     { name: 'AI Advisor', href: '/advisor', icon: Sparkles },
     { name: 'Questionnaire', href: '/questionnaire', icon: Target },
     { name: 'Budget', href: '/budget', icon: DollarSign },
-    { name: 'Transactions', href: '/transactions', icon: DollarSign },
+    { name: 'Transactions', href: '/transactions', icon: CreditCard },
     { name: 'Debt', href: '/debt', icon: TrendingUp },
-    { name: 'Investments', href: '/investments', icon: PieChart },
-    { name: 'Analytics', href: '/analytics', icon: PieChart },
     { name: 'Portfolio', href: '/portfolio', icon: PieChart },
     { name: 'Market', href: '/market', icon: TrendingUp },
     { name: 'Watchlist', href: '/watchlist', icon: Star },
     { name: 'Suggestions', href: '/suggestions', icon: Lightbulb },
     { name: 'Goals', href: '/goals', icon: Target },
+    { name: 'Analytics', href: '/analytics', icon: PieChart },
   ];
-
+  
   const handleLogout = async () => {
     try {
       await dispatch(logout()).unwrap();

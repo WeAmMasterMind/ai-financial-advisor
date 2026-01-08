@@ -5,7 +5,7 @@ import {
   DollarSign, Search, Edit2, Trash2, X
 } from 'lucide-react';
 import { fetchTransactions, fetchStats, deleteTransaction, setFilters } from '../../store/features/transactionSlice';
-import { fetchCategories } from '../../store/features/budgetSlice';
+import { fetchCategories, fetchBudgetSummary } from '../../store/features/budgetSlice';
 import TransactionForm from './TransactionForm';
 import toast from 'react-hot-toast';
 
@@ -33,6 +33,7 @@ const TransactionList = () => {
       toast.success('Transaction deleted!');
       dispatch(fetchTransactions(filters));
       dispatch(fetchStats(filters));
+      dispatch(fetchBudgetSummary());
     } catch (error) {
       toast.error('Failed to delete transaction');
     }
@@ -309,6 +310,7 @@ const TransactionList = () => {
             setEditingTransaction(null);
             dispatch(fetchTransactions(filters));
             dispatch(fetchStats(filters));
+            dispatch(fetchBudgetSummary()); 
             toast.success(editingTransaction ? 'Transaction updated!' : 'Transaction added!');
           }}
         />

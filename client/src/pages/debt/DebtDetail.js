@@ -5,20 +5,29 @@
 
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { fetchDebtById, clearCurrentDebt } from '../../store/features/debtSlice';
 
 const DebtDetail = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { id } = useParams();
   const { currentDebt, isLoading } = useSelector(state => state.debt);
 
+  // Validate that id is a proper UUID
+  const isValidUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+
   useEffect(() => {
+    if (!isValidUUID) {
+      // Redirect to debt dashboard if not a valid UUID (e.g., "calculator")
+      navigate('/debt');
+      return;
+    }
     dispatch(fetchDebtById(id));
     return () => {
       dispatch(clearCurrentDebt());
     };
-  }, [dispatch, id]);
+  }, [dispatch, id, isValidUUID, navigate]);
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', {

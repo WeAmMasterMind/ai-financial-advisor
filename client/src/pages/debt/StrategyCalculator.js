@@ -4,13 +4,14 @@
  */
 
 import React, { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { fetchDebts, fetchComparison, saveStrategy } from '../../store/features/debtSlice';
 
 const StrategyCalculator = () => {
   const dispatch = useDispatch();
-  const { debts, comparison, isLoading, isCalculating } = useSelector(state => state.debt);
+  const { debts, comparison, isLoading, isCalculating, successMessage, error } = useSelector(state => state.debt);
   const [monthlyExtra, setMonthlyExtra] = useState(100);
 
   useEffect(() => {
@@ -22,6 +23,15 @@ const StrategyCalculator = () => {
       dispatch(fetchComparison(monthlyExtra));
     }
   }, [dispatch, debts.length, monthlyExtra]);
+
+  useEffect(() => {
+    if (successMessage) {
+      toast.success(successMessage);
+    }
+    if (error) {
+      toast.error(error);
+    }
+  }, [successMessage, error]);
 
   const handleCalculate = () => {
     dispatch(fetchComparison(monthlyExtra));
